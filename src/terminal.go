@@ -54,7 +54,7 @@ const ellipsis string = ".."
 const clearCode string = "\x1b[2J"
 
 func init() {
-	placeholder = regexp.MustCompile(`\\?(?:{[+sf]*[0-9,-.]*}|{q}|{\+?f?nf?})`)
+	placeholder = regexp.MustCompile(`\\?(?:{[+sf]*[0-9,-.]*}|{q}|{\|q}|{q\|}|{\+?f?nf?})`)
 	whiteSuffix = regexp.MustCompile(`\s*$`)
 	offsetComponentRegex = regexp.MustCompile(`([+-][0-9]+)|(-?/[1-9][0-9]*)`)
 	offsetTrimCharsRegex = regexp.MustCompile(`[^0-9/+-]`)
@@ -1707,6 +1707,20 @@ func replacePlaceholder(template string, stripAnsi bool, delimiter Delimiter, pr
 			return match
 		case match == "{q}":
 			return quoteEntry(query)
+		case match == "{q|}":
+			var term = ""
+			if len(query) > 0 {
+				term = strings.TrimSpace(query)
+				term = strings.Replace(term," ","|",-1)
+			}
+			return term
+		case match == "{|q}":
+			var term = ""
+			if len(query) > 0 {
+				term = strings.TrimSpace(query)
+				term = "|" + strings.Replace(term," ","|",-1)
+			}
+			return term
 		case match == "{}":
 			replace = func(item *Item) string {
 				switch {
